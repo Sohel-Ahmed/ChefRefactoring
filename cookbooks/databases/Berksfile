@@ -1,0 +1,8 @@
+# frozen_string_literal: true
+source 'https://supermarket.chef.io'
+
+metadata
+
+group :integration do
+  cookbook 'db_api', path: '../db_api'
+end

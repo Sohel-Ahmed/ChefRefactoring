@@ -1,0 +1,49 @@
+---
+driver:
+  name: docker
+  use_sudo: false
+
+provisioner:
+  name: chef_zero
+  # You may wish to disable always updating cookbooks in CI or other testing environments.
+  # For example:
+  #   always_update_cookbooks: <%= !ENV['CI'] %>
+  always_update_cookbooks: true
+  product_name: chef
+  product_version: 13.10.4
+  data_bags_path: "test/fixtures/data_bags/"
+
+verifier:
+  name: inspec
+
+platforms:
+  - name: ubuntu-16.04
+    driver_config:
+      run_command: /bin/systemd
+      privileged: true
+  - name: centos-7
+    driver_config:
+      run_command: /usr/sbin/init
+      privileged: true
+      provision_command:
+        - systemctl enable sshd.service
+
+suites:
+  - name: db_api
+    driver:
+      publish_all: true
+      instance_name: db_api
+      ports:
+        - "80:80"
+    run_list:
+      - recipe[db_api::default]
+    excludes:
+      - ubuntu-16.04
+  - name: default
+    driver:
+      links:
+        - "db_api:data.example.com"
+    run_list:
+      - recipe[databases::default]
+    attributes:
+      db_role: "metrics"

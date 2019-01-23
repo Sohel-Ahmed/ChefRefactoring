@@ -1,0 +1,14 @@
+[Unit]
+Description=gunicorn daemon
+After=network.target
+
+[Service]
+WorkingDirectory=/srv/db_api
+ExecStartPre=/bin/mkdir -p /run/gunicorn
+ExecStart=/usr/bin/gunicorn --bind unix:/run/gunicorn/socket wsgi:app
+ExecReload=/bin/kill -s HUP $MAINPID
+ExecStop=/bin/kill -s TERM $MAINPID
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
